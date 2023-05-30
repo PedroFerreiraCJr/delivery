@@ -13,6 +13,6 @@ public class PedidoNaoEncontradoException extends RuntimeException {
 	}
 
 	public PedidoNaoEncontradoException(Long cidadeId) {
-		this(String.format("Cliente de código %d não encontrado", cidadeId));
+		this(String.format("Pedido de código %d não encontrado", cidadeId));
 	}
 }
