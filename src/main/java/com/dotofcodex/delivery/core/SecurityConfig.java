@@ -22,6 +22,9 @@ import com.dotofcodex.delivery.service.CadastroClienteService;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
+	private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+	
+	@Autowired
 	private CadastroClienteService service;
 	
 	@Autowired
@@ -34,12 +37,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http = http.cors().and().csrf().disable();
+		http = http.csrf().disable();
 		
 		http = http
             .sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and();
+		
+		http.exceptionHandling()
+			.authenticationEntryPoint(jwtAuthenticationEntryPoint);
 		
 		http.authorizeRequests()
 		.antMatchers(HttpMethod.POST, "/api/auth").permitAll()
@@ -52,19 +58,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             UsernamePasswordAuthenticationFilter.class
         );
 	}
-
-	@Bean
-    public CorsFilter corsFilter() {
-        UrlBasedCorsConfigurationSource source =
-            new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.addAllowedOrigin("*");
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
-        source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
-    }
 	
 	@Bean
 	@Override

@@ -25,39 +25,47 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
-	
+
 	@Autowired
 	private CadastroClienteService service;
-	
+
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws ServletException, IOException {
-		final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (ObjectUtils.isEmpty(header) || !header.startsWith("Bearer ")) {
-            chain.doFilter(request, response);
-            return;
-        }
-        
-        final String token = header.split(" ")[1].trim();
-        if (!jwtTokenUtil.validateToken(token)) {
-            chain.doFilter(request, response);
-            return;
-        }
-        
-        UserDetails userDetails = service
-            .loadUserByUsername(jwtTokenUtil.getUsernameFromToken(token));
-        
-        UsernamePasswordAuthenticationToken
-        authentication = new UsernamePasswordAuthenticationToken(
-            userDetails, null, userDetails == null
-            	? new ArrayList<>()
-            	: userDetails.getAuthorities()
-        );
-        
-        authentication.setDetails(new WebAuthenticationDetailsSource()
-    		.buildDetails(request));
+		
+		String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+		if (ObjectUtils.isEmpty(header) || !header.startsWith("Bearer ")) {
+			chain.doFilter(request, response);
+			return;
+		}
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        chain.doFilter(request, response);
+		String token = getTokenFromHeader(header);
+		String username = jwtTokenUtil.getUsernameFromToken(token);
+		
+		UserDetails details = service.loadUserByUsername(username);
+		if (!jwtTokenUtil.validateToken(token, details)) {
+			chain.doFilter(request, response);
+			return;
+		}
+
+		setAuthenticatedUser(request, details);
+
+		chain.doFilter(request, response);
+	}
+
+	private void setAuthenticatedUser(HttpServletRequest request, UserDetails details) {
+		UsernamePasswordAuthenticationToken auth = new
+				UsernamePasswordAuthenticationToken(details, null, details == null
+				? new ArrayList<>()
+				: details.getAuthorities());
+
+		auth.setDetails(new WebAuthenticationDetailsSource()
+				.buildDetails(request));
+
+		SecurityContextHolder.getContext().setAuthentication(auth);
+	}
+
+	private String getTokenFromHeader(final String header) {
+		return header.split(" ")[1].trim();
 	}
 }
