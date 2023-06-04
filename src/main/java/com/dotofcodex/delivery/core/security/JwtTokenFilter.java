@@ -1,4 +1,4 @@
-package com.dotofcodex.delivery.core;
+package com.dotofcodex.delivery.core.security;
 
 import java.io.IOException;
 import java.util.ArrayList;

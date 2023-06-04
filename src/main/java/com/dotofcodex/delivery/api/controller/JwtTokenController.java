@@ -21,7 +21,7 @@ import com.dotofcodex.delivery.api.model.ClienteInput;
 import com.dotofcodex.delivery.api.model.ClienteModel;
 import com.dotofcodex.delivery.api.model.JwtTokenResponse;
 import com.dotofcodex.delivery.api.model.UserInput;
-import com.dotofcodex.delivery.core.JwtTokenUtil;
+import com.dotofcodex.delivery.core.security.JwtTokenUtil;
 import com.dotofcodex.delivery.model.Cliente;
 import com.dotofcodex.delivery.service.CadastroClienteService;
 
